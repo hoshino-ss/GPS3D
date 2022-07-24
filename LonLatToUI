@@ -1,0 +1,48 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+
+/// <summary>UI更新クラス</summary>
+public class LonLatToUI : MonoBehaviour
+{
+    /// <summary>テキストテンプレート</summary>
+    private const string LonLatInfoTemplate = "緯度: {0}\n経度: {1}\n住所: {2}";
+
+    /// <summary>表示用テキストUIオブジェクト</summary>
+    private TextMeshProUGUI lonLatInfo;
+
+    /// <summary>経緯度取得オブジェクト</summary>
+    private LonLatGetter lonLatGetter;
+
+    /// <summary>逆ジオコーディングオブジェクト</summary>
+    private LonLatToAddr lonLatToAddr;
+
+    /// <summary>初期化</summary>
+    private void Start()
+    {
+        // テキストラベルオブジェクトを保持
+        lonLatInfo = GameObject.Find("LonLatInfo").GetComponent<TextMeshProUGUI>();
+
+        // 経緯度取得オブジェクトオブジェクトを保持
+        lonLatGetter = GetComponent<LonLatGetter>();
+
+        // 逆ジオコーディングオブジェクトを取得
+        lonLatToAddr = GetComponent<LonLatToAddr>();
+    }
+
+    /// <summary>経緯度の値をテキストUIに反映</summary>
+    private void Update()
+    {
+        // 経緯度の値を取得できるか判定
+        if (lonLatGetter.CanGetLonLat())
+        {
+            StartCoroutine(lonLatToAddr.GetAddrFromLonLat(lonLatGetter.Longitude, lonLatGetter.Latitude));
+            lonLatInfo.text = string.Format(LonLatInfoTemplate, lonLatGetter.Latitude.ToString(), lonLatGetter.Longitude.ToString(), lonLatToAddr.Address);
+        }
+        else
+        {
+            lonLatInfo.text = string.Format(LonLatInfoTemplate, "測定不能", "測定不能", "測定不能");
+        }
+    }
+}
